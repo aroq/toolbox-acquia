@@ -1,13 +1,13 @@
-FROM php:7.4.4-cli-alpine3.11
+FROM composer:1.9.3
 
 COPY Dockerfile.packages.txt /etc/apk/packages.txt
 COPY acquiacli.yml /root/.acquiacli/acquiacli.yml
 
 RUN apk add --no-cache --update $(grep -v '^#' /etc/apk/packages.txt)
 
-RUN wget https://github.com/typhonius/acquia_cli/releases/latest/download/acquiacli.phar && \
-    mv acquiacli.phar /usr/local/bin/acquiacli && \
-    chmod +x /usr/local/bin/acquiacli && \
-    acquiacli self:update
+RUN git clone -b master --depth=1 --single-branch https://github.com/typhonius/acquia_cli.git /root/acquia_cli && \
+    cd /root/acquia_cli && \
+    composer install && \
+    ln -s /root/acquia_cli/bin/acquiacli /usr/local/bin/
 
 ENTRYPOINT ["/usr/local/bin/acquiacli"]
